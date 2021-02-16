@@ -1,0 +1,64 @@
+{
+  "_from": "react-native-calendars-fork@^1.22.0",
+  "_id": "react-native-calendars-fork@1.22.0",
+  "_inBundle": false,
+  "_integrity": "sha1-KLCShuFQOFDkychXDgZxTJLmDrA=",
+  "_location": "/react-native-calendars-fork",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "range",
+    "registry": true,
+    "raw": "react-native-calendars-fork@^1.22.0",
+    "name": "react-native-calendars-fork",
+    "escapedName": "react-native-calendars-fork",
+    "rawSpec": "^1.22.0",
+    "saveSpec": null,
+    "fetchSpec": "^1.22.0"
+  },
+  "_requiredBy": [
+    "/"
+  ],
+  "_resolved": "https://pkgs.dev.azure.com/sasys/_packaging/main-feed/npm/registry/react-native-calendars-fork/-/react-native-calendars-fork-1.22.0.tgz",
+  "_shasum": "28b09286e1503850e4c9c8570e06714c92e60eb0",
+  "_spec": "react-native-calendars-fork@^1.22.0",
+  "_where": "/Users/james/Documents/repos/connecx/connecx-app/app",
+  "author": "",
+  "bundleDependencies": false,
+  "dependencies": {
+    "hoist-non-react-statics": "^3.3.1",
+    "lodash": "^4.17.15",
+    "moment": "^2.24.0",
+    "prop-types": "^15.5.10",
+    "xdate": "^0.8.0"
+  },
+  "deprecated": false,
+  "description": "React Native Calendar Components",
+  "devDependencies": {
+    "babel-eslint": "^7.2.3",
+    "detox": "^15.5.0",
+    "eslint": "^6.5.1",
+    "eslint-plugin-react": "^7.0.0",
+    "jasmine": "^2.5.2",
+    "mocha": "^7.1.0",
+    "react": "16.9.0",
+    "react-native": "0.61.4",
+    "react-native-navigation": "^3.5.1",
+    "semver": "5.x.x",
+    "shell-utils": "1.x.x"
+  },
+  "license": "MIT",
+  "main": "src/index.js",
+  "name": "react-native-calendars-fork",
+  "scripts": {
+    "android": "react-native run-android",
+    "build": "xcodebuild -project ios/CalendarsExample.xcodeproj build",
+    "e2e": "node ./scripts/test-e2e.js",
+    "ios": "react-native run-ios",
+    "lint": "eslint src/ example/src",
+    "release": "node ./scripts/release.js",
+    "start": "react-native start",
+    "test": "jasmine src/*.spec.js && npm run lint",
+    "xcode": "open ios/CalendarsExample.xcworkspace/"
+  },
+  "version": "1.22.0"
+}
