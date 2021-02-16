@@ -1,27 +1,4 @@
 {
-  "_from": "react-native-calendars-fork@^1.22.0",
-  "_id": "react-native-calendars-fork@1.22.0",
-  "_inBundle": false,
-  "_integrity": "sha1-KLCShuFQOFDkychXDgZxTJLmDrA=",
-  "_location": "/react-native-calendars-fork",
-  "_phantomChildren": {},
-  "_requested": {
-    "type": "range",
-    "registry": true,
-    "raw": "react-native-calendars-fork@^1.22.0",
-    "name": "react-native-calendars-fork",
-    "escapedName": "react-native-calendars-fork",
-    "rawSpec": "^1.22.0",
-    "saveSpec": null,
-    "fetchSpec": "^1.22.0"
-  },
-  "_requiredBy": [
-    "/"
-  ],
-  "_resolved": "https://pkgs.dev.azure.com/sasys/_packaging/main-feed/npm/registry/react-native-calendars-fork/-/react-native-calendars-fork-1.22.0.tgz",
-  "_shasum": "28b09286e1503850e4c9c8570e06714c92e60eb0",
-  "_spec": "react-native-calendars-fork@^1.22.0",
-  "_where": "/Users/james/Documents/repos/connecx/connecx-app/app",
   "author": "",
   "bundleDependencies": false,
   "dependencies": {
@@ -48,7 +25,7 @@
   },
   "license": "MIT",
   "main": "src/index.js",
-  "name": "react-native-calendars-fork",
+  "name": "@connecx/react-native-calendar",
   "scripts": {
     "android": "react-native run-android",
     "build": "xcodebuild -project ios/CalendarsExample.xcodeproj build",
@@ -60,5 +37,5 @@
     "test": "jasmine src/*.spec.js && npm run lint",
     "xcode": "open ios/CalendarsExample.xcworkspace/"
   },
-  "version": "1.22.0"
+  "version": "1.0.0"
 }
