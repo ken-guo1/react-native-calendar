@@ -4,7 +4,7 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  Dimensions
+  Dimensions,
 } from 'react-native';
 import PropTypes from 'prop-types';
 import populateEvents from './Packer';
@@ -110,30 +110,72 @@ export default class Timeline extends React.PureComponent {
       } else {
         timeText = !format24h ? `${i - 12} PM` : `${i}:00`;
       }
-      return [
+
+      const Label = () => (
         <Text
           key={`timeLabel${i}`}
           style={[this.styles.timeLabel, {top: offset * index - 6}]}>
           {timeText}
-        </Text>,
-        i === start ? null : (
-          <View
-            key={`line${i}`}
-            onPress={() => this._onLinePressed(i)}
-            style={[
-              this.styles.line,
-              {top: offset * index, width: dimensionWidth - EVENT_DIFF},
-            ]}
-          />
-        ),
+        </Text>
+      );
+
+      const Line = () => (
+        <View
+          key={`line${i}`}
+          style={[
+            this.styles.line,
+            {top: offset * index, width: dimensionWidth - EVENT_DIFF},
+          ]}
+        />
+      );
+
+      const LineHalf = () => (
         <View
           key={`lineHalf${i}`}
-          onPress={() => this._onLinePressed(i, true)}
           style={[
             this.styles.line,
             {top: offset * (index + 0.5), width: dimensionWidth - EVENT_DIFF},
           ]}
-        />,
+        />
+      );
+
+      const TouchArea = () => (
+        <TouchableOpacity onPress={() => this._onLinePressed(`${i}`)}>
+          <View
+            key={`touchArea${i}`}
+            style={[
+              {
+                top: offset * index,
+                width: dimensionWidth - EVENT_DIFF,
+                height: offset * 0.5,
+              },
+            ]}
+          />
+        </TouchableOpacity>
+      );
+
+      // ? this is whack - not sure why the touch areas are reversed?
+      const TouchAreaHalf = () => (
+        <TouchableOpacity onPress={() => this._onLinePressed(`${i - 1}:30`)}>
+          <View
+            key={`touchAreaHalf${i}`}
+            style={[
+              {
+                top: offset * (index + 0.5),
+                width: dimensionWidth - EVENT_DIFF,
+                height: offset * 0.5,
+              },
+            ]}
+          />
+        </TouchableOpacity>
+      );
+
+      // TODO fix line 157 needing -1
+      return [
+        <Label />, // shows label on side
+        i === start ? null : [<Line />, <TouchAreaHalf />], // if not the start of allowed hours, show first half hour
+        <LineHalf />, // render second half of hour
+        <TouchArea />,
       ];
     });
   }
@@ -142,8 +184,8 @@ export default class Timeline extends React.PureComponent {
     this.props.eventTapped(event);
   }
 
-  _onLinePressed(event, lineHalf) {
-    this.props.onLinePress(event, lineHalf);
+  _onLinePressed(event) {
+    this.props.onLinePress(event);
   }
   _renderEvents() {
     const {packedEvents} = this.state;
@@ -154,6 +196,7 @@ export default class Timeline extends React.PureComponent {
         width: event.width,
         top: event.top,
         backgroundColor: event.color ? event.color : '#add8e6',
+        zIndex: 1,
       };
 
       // Fixing the number of lines for the event title makes this calculation easier.
@@ -207,9 +250,12 @@ export default class Timeline extends React.PureComponent {
           this.styles.contentStyle,
           {width: dimensionWidth},
         ]}>
-        {this._renderLines()}
+        {/* Renderering lines first hides the events? - that is how the have it in their docs 
+          https://github.dev/wix/react-native-calendars - line 230
+          I have swapped around and added z index to event to put on top - not sure if it is a good long term solution
+          */}
         {this._renderEvents()}
-        {/* {this._renderRedLine()} */}
+        {this._renderLines()}
       </ScrollView>
     );
   }
