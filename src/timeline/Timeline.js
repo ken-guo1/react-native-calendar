@@ -111,72 +111,77 @@ export default class Timeline extends React.PureComponent {
         timeText = !format24h ? `${i - 12} PM` : `${i}:00`;
       }
 
-      const Label = () => (
-        <Text
-          key={`timeLabel${i}`}
-          style={[this.styles.timeLabel, {top: offset * index - 6}]}>
-          {timeText}
-        </Text>
-      );
+    const TimeLabel = () => (
+      <Text
+        key={`timeLabel${i}`}
+        style={[this.styles.timeLabel, {top: offset * index - 6}]}>
+        {timeText}
+      </Text>
+    );
 
-      const Line = () => (
+    /* First line is aligned with the label */
+    const FirstLine = () => (
+      <View
+        key={`line${i}`}
+        style={[
+          this.styles.line,
+          {top: offset * index, width: dimensionWidth - EVENT_DIFF},
+        ]}
+      />
+    );
+
+    const SecondLine = () => (
+      <View
+        key={`lineHalf${i}`}
+        style={[
+          this.styles.line,
+          {top: offset * (index + 0.5), width: dimensionWidth - EVENT_DIFF},
+        ]}
+      />
+    );
+
+    // todo this is whack - not sure why the touch areas are reversed?
+    /* Touching this view will return the start of the hour - eg. 10:00am */
+    const FirstHalfTouchArea = () => (
+      <TouchableOpacity
+        onPress={() => this._onLinePressed(`${i}`)}
+        key={`firstHalfTouchArea${i}`}>
         <View
-          key={`line${i}`}
           style={[
-            this.styles.line,
-            {top: offset * index, width: dimensionWidth - EVENT_DIFF},
+            {
+              top: offset * index,
+              width: dimensionWidth - EVENT_DIFF,
+              height: offset * 0.5,
+            },
           ]}
         />
-      );
+      </TouchableOpacity>
+    );
 
-      const LineHalf = () => (
+    /* Touching this view will return the middle of the hour - eg. 10:30am */
+    const SecondHalfTouchArea = () => (
+      <TouchableOpacity
+        onPress={() => this._onLinePressed(`${i - 1}:30`)}
+        key={`secondHalfTouchArea${i}`}>
         <View
-          key={`lineHalf${i}`}
           style={[
-            this.styles.line,
-            {top: offset * (index + 0.5), width: dimensionWidth - EVENT_DIFF},
+            {
+              top: offset * (index + 0.5),
+              width: dimensionWidth - EVENT_DIFF,
+              height: offset * 0.5,
+            },
           ]}
         />
-      );
+      </TouchableOpacity>
+    );
 
-      const TouchArea = () => (
-        <TouchableOpacity onPress={() => this._onLinePressed(`${i}`)}>
-          <View
-            key={`touchArea${i}`}
-            style={[
-              {
-                top: offset * index,
-                width: dimensionWidth - EVENT_DIFF,
-                height: offset * 0.5,
-              },
-            ]}
-          />
-        </TouchableOpacity>
-      );
-
-      // ? this is whack - not sure why the touch areas are reversed?
-      const TouchAreaHalf = () => (
-        <TouchableOpacity onPress={() => this._onLinePressed(`${i - 1}:30`)}>
-          <View
-            key={`touchAreaHalf${i}`}
-            style={[
-              {
-                top: offset * (index + 0.5),
-                width: dimensionWidth - EVENT_DIFF,
-                height: offset * 0.5,
-              },
-            ]}
-          />
-        </TouchableOpacity>
-      );
-
-      // TODO fix line 157 needing -1
-      return [
-        <Label />, // shows label on side
-        i === start ? null : [<Line />, <TouchAreaHalf />], // if not the start of allowed hours, show first half hour
-        <LineHalf />, // render second half of hour
-        <TouchArea />,
-      ];
+    // TODO fix line 157 needing -1
+    return [
+      <TimeLabel />, // shows label on side
+      i === start ? null : [<FirstLine />, <SecondHalfTouchArea />], // if not the start of allowed hours, show first half hour
+      <SecondLine />, // render second half of hour
+      <FirstHalfTouchArea />,
+    ];
     });
   }
 
