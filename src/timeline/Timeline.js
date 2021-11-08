@@ -4,7 +4,7 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  Dimensions
+  Dimensions,
 } from 'react-native';
 import PropTypes from 'prop-types';
 import populateEvents from './Packer';
@@ -32,22 +32,25 @@ export default class Timeline extends React.PureComponent {
     start: PropTypes.number,
     end: PropTypes.number,
     eventTapped: PropTypes.func,
+    onLinePress: PropTypes.func,
     format24h: PropTypes.bool,
-    events: PropTypes.arrayOf(PropTypes.shape({
-      start: PropTypes.string.isRequired,
-      end: PropTypes.string.isRequired,
-      title: PropTypes.string.isRequired,
-      summary: PropTypes.string.isRequired,
-      color: PropTypes.string
-    })).isRequired
-  }
+    events: PropTypes.arrayOf(
+      PropTypes.shape({
+        start: PropTypes.string.isRequired,
+        end: PropTypes.string.isRequired,
+        title: PropTypes.string.isRequired,
+        summary: PropTypes.string.isRequired,
+        color: PropTypes.string,
+      }),
+    ).isRequired,
+  };
 
   static defaultProps = {
     start: 0,
     end: 24,
     events: [],
-    format24h: true
-  }
+    format24h: true,
+  };
 
   constructor(props) {
     super(props);
@@ -61,14 +64,14 @@ export default class Timeline extends React.PureComponent {
     const verifiedInitPosition = initPosition < 0 ? 0 : initPosition;
     this.state = {
       _scrollY: verifiedInitPosition,
-      packedEvents
+      packedEvents,
     };
   }
 
   UNSAFE_componentWillReceiveProps({events, start = 0}) {
     const width = dimensionWidth - LEFT_MARGIN;
     this.setState({
-      packedEvents: populateEvents(events, width, start)
+      packedEvents: populateEvents(events, width, start),
     });
   }
 
@@ -82,7 +85,7 @@ export default class Timeline extends React.PureComponent {
         this._scrollView.scrollTo({
           x: 0,
           y: this.state._scrollY,
-          animated: true
+          animated: true,
         });
       }
     }, 1);
@@ -107,29 +110,78 @@ export default class Timeline extends React.PureComponent {
       } else {
         timeText = !format24h ? `${i - 12} PM` : `${i}:00`;
       }
-      return [
-        <Text
-          key={`timeLabel${i}`}
-          style={[this.styles.timeLabel, {top: offset * index - 6}]}>
-          {timeText}
-        </Text>,
-        i === start ? null : (
-          <View
-            key={`line${i}`}
-            style={[
-              this.styles.line,
-              {top: offset * index, width: dimensionWidth - EVENT_DIFF}
-            ]}
-          />
-        ),
+
+    const TimeLabel = () => (
+      <Text
+        key={`timeLabel${i}`}
+        style={[this.styles.timeLabel, {top: offset * index - 6}]}>
+        {timeText}
+      </Text>
+    );
+
+    /* First line is aligned with the label */
+    const FirstLine = () => (
+      <View
+        key={`line${i}`}
+        style={[
+          this.styles.line,
+          {top: offset * index, width: dimensionWidth - EVENT_DIFF},
+        ]}
+      />
+    );
+
+    const SecondLine = () => (
+      <View
+        key={`lineHalf${i}`}
+        style={[
+          this.styles.line,
+          {top: offset * (index + 0.5), width: dimensionWidth - EVENT_DIFF},
+        ]}
+      />
+    );
+
+    // todo this is whack - not sure why the touch areas are reversed?
+    /* Touching this view will return the start of the hour - eg. 10:00am */
+    const FirstHalfTouchArea = () => (
+      <TouchableOpacity
+        onPress={() => this._onLinePressed(`${i}`)}
+        key={`firstHalfTouchArea${i}`}>
         <View
-          key={`lineHalf${i}`}
           style={[
-            this.styles.line,
-            {top: offset * (index + 0.5), width: dimensionWidth - EVENT_DIFF}
+            {
+              top: offset * index,
+              width: dimensionWidth - EVENT_DIFF,
+              height: offset * 0.5,
+            },
           ]}
         />
-      ];
+      </TouchableOpacity>
+    );
+
+    /* Touching this view will return the middle of the hour - eg. 10:30am */
+    const SecondHalfTouchArea = () => (
+      <TouchableOpacity
+        onPress={() => this._onLinePressed(`${i - 1}:30`)}
+        key={`secondHalfTouchArea${i}`}>
+        <View
+          style={[
+            {
+              top: offset * (index + 0.5),
+              width: dimensionWidth - EVENT_DIFF,
+              height: offset * 0.5,
+            },
+          ]}
+        />
+      </TouchableOpacity>
+    );
+
+    // TODO fix line 157 needing -1
+    return [
+      <TimeLabel />, // shows label on side
+      i === start ? null : [<FirstLine />, <SecondHalfTouchArea />], // if not the start of allowed hours, show first half hour
+      <SecondLine />, // render second half of hour
+      <FirstHalfTouchArea />,
+    ];
     });
   }
 
@@ -137,6 +189,9 @@ export default class Timeline extends React.PureComponent {
     this.props.eventTapped(event);
   }
 
+  _onLinePressed(event) {
+    this.props.onLinePress(event);
+  }
   _renderEvents() {
     const {packedEvents} = this.state;
     let events = packedEvents.map((event, i) => {
@@ -145,7 +200,8 @@ export default class Timeline extends React.PureComponent {
         height: event.height,
         width: event.width,
         top: event.top,
-        backgroundColor: event.color ? event.color : '#add8e6'
+        backgroundColor: event.color ? event.color : '#add8e6',
+        zIndex: 1,
       };
 
       // Fixing the number of lines for the event title makes this calculation easier.
@@ -194,14 +250,17 @@ export default class Timeline extends React.PureComponent {
   render() {
     return (
       <ScrollView
-        ref={ref => (this._scrollView = ref)}
+        ref={(ref) => (this._scrollView = ref)}
         contentContainerStyle={[
           this.styles.contentStyle,
-          {width: dimensionWidth}
+          {width: dimensionWidth},
         ]}>
-        {this._renderLines()}
+        {/* Renderering lines first hides the events? - that is how the have it in their docs 
+          https://github.dev/wix/react-native-calendars - line 230
+          I have swapped around and added z index to event to put on top - not sure if it is a good long term solution
+          */}
         {this._renderEvents()}
-        {/* {this._renderRedLine()} */}
+        {this._renderLines()}
       </ScrollView>
     );
   }
